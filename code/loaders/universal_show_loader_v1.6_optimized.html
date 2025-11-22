@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VR Creative Show Loader</title>
+  <meta name="description" content="Dynamic show page loader for VR Creative." />
+
+  <style>
+    /* ===== CSS Variables ===== */
+    :root {
+      --bg: #0b0b0f;
+      --text: #e9e9ef;
+      --accent: #7cf0ff;
+      --muted: #b7b7c3;
+      --card: #14141c;
+      --pill: #1f1f2b;
+      --max-width: 1100px;
+      --focus-ring: 2px solid var(--accent);
+    }
+
+    /* ===== Base Styles ===== */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    /* ===== Layout ===== */
+    .page-shell {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      align-items: center;
+    }
+
+    .hero img {
+      width: 100%;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    /* ===== Typography ===== */
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.1;
+    }
+
+    .tagline {
+      color: var(--muted);
+      margin: 0 0 18px;
+      font-size: 18px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      margin: 0 0 16px;
+    }
+
+    .body-copy {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* ===== Buttons ===== */
+    .cta-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .btn:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, #00c6ff, #0072ff);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(0, 114, 255, 0.35);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: #2f2f3f;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 16px 40px rgba(0, 114, 255, 0.45);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+    }
+
+    /* ===== Tags ===== */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tag-pill {
+      background: var(--pill);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid #2c2c38;
+      font-size: 13px;
+      text-decoration: none;
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+
+    .tag-pill:hover {
+      border-color: var(--accent);
+      background: #252531;
+    }
+
+    .tag-pill:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* ===== Cards ===== */
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid #1f1f2b;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 14px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .card-tags a {
+      color: var(--muted);
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .card-tags a:hover {
+      color: var(--accent);
+    }
+
+    /* ===== Loading and Error States ===== */
+    .loading,
+    .error {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .spinner {
+      border: 3px solid var(--pill);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #ff6b6b;
+    }
+
+    /* ===== Accessibility ===== */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell" id="show-root">
+    <div class="loading">
+      <div class="spinner" role="status" aria-label="Loading show data"></div>
+      <p>Loading show details...</p>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Universal Show Loader v1.6 (Optimized)
+     * VR Creative Group
+     *
+     * Features:
+     * - Error handling and loading states
+     * - Accessibility improvements
+     * - XSS protection via sanitization
+     * - Configurable via environment or window globals
+     */
+
+    // ===== Configuration =====
+    const CONFIG = {
+      dataUrl: window.SHOW_DATA_URL || "https://example.com/shows.json",
+      showSlug: new URLSearchParams(window.location.search).get("slug") || window.SHOW_SLUG || "",
+      tagLinkBase: window.TAG_LINK_BASE || "/filtered-shows?tag=",
+      showLinkBase: window.SHOW_LINK_BASE || "/stage-shows/",
+      bookingEmail: window.BOOKING_EMAIL || "booking@vrcreative.com",
+      bookingPhone: window.BOOKING_PHONE || "+16155551234",
+      maxRetries: 3,
+      retryDelay: 1000
+    };
+
+    // ===== Utility Functions =====
+
+    /**
+     * Sanitize text to prevent XSS
+     */
+    function sanitizeText(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    /**
+     * Sanitize HTML for bio content (allows basic HTML)
+     */
+    function sanitizeHTML(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      // Remove script tags and event handlers
+      const scripts = div.querySelectorAll('script');
+      scripts.forEach(script => script.remove());
+
+      // Remove event handler attributes
+      const allElements = div.querySelectorAll('*');
+      allElements.forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name.startsWith('on')) {
+            el.removeAttribute(attr.name);
+          }
+        });
+      });
+
+      return div.innerHTML;
+    }
+
+    /**
+     * Fetch show data with retry logic
+     */
+    async function fetchShows(retryCount = 0) {
+      // Check for cached data
+      if (window.SHOW_DATA) {
+        return window.SHOW_DATA;
+      }
+
+      try {
+        const res = await fetch(CONFIG.dataUrl, {
+          headers: {
+            'Accept': 'application/json'
+          },
+          cache: 'default'
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        return Array.isArray(data) ? data : data.shows || [];
+      } catch (error) {
+        console.error(`Fetch attempt ${retryCount + 1} failed:`, error);
+
+        if (retryCount < CONFIG.maxRetries) {
+          // Exponential backoff
+          await new Promise(resolve =>
+            setTimeout(resolve, CONFIG.retryDelay * Math.pow(2, retryCount))
+          );
+          return fetchShows(retryCount + 1);
+        }
+
+        throw new Error(`Failed to load show data after ${CONFIG.maxRetries + 1} attempts: ${error.message}`);
+      }
+    }
+
+    // ===== SEO Metadata Injection =====
+
+    /**
+     * Inject meta tags for SEO and social sharing
+     */
+    function injectMeta(show) {
+      if (!show) return;
+
+      // Set page title
+      document.title = sanitizeText(show.meta_title || show.title);
+
+      // Helper to create or update meta tags
+      const ensureMeta = (name, content) => {
+        let tag = document.querySelector(`meta[name="${name}"]`);
+        if (!tag) {
+          tag = document.createElement("meta");
+          tag.setAttribute("name", name);
+          document.head.appendChild(tag);
+        }
+        tag.setAttribute("content", sanitizeText(content));
+      };
+
+      // Standard meta tags
+      ensureMeta("description", show.meta_description || show.tagline || "VR Creative show");
+
+      // Open Graph tags
+      const ogTags = [
+        ["property", "og:title", show.meta_title || show.title],
+        ["property", "og:description", show.meta_description || show.tagline || "VR Creative show"],
+        ["property", "og:type", "website"],
+        ["property", "og:image", show.imageurl],
+        ["property", "og:url", window.location.href],
+      ];
+
+      ogTags.forEach(([attr, key, value]) => {
+        if (!value) return; // Skip if no value
+
+        let node = document.querySelector(`meta[${attr}="${key}"]`);
+        if (!node) {
+          node = document.createElement("meta");
+          node.setAttribute(attr, key);
+          document.head.appendChild(node);
+        }
+        node.setAttribute("content", sanitizeText(String(value)));
+      });
+    }
+
+    // ===== Component Builders =====
+
+    /**
+     * Create a tag pill element
+     */
+    function createTagPill(tag) {
+      const a = document.createElement("a");
+      a.className = "tag-pill";
+      a.href = `${CONFIG.tagLinkBase}${encodeURIComponent(tag)}`;
+      a.textContent = sanitizeText(tag);
+      a.setAttribute("aria-label", `View all ${tag} shows`);
+      return a;
+    }
+
+    /**
+     * Build hero section
+     */
+    function buildHero(show) {
+      const hero = document.createElement("section");
+      hero.className = "hero";
+      hero.setAttribute("aria-label", "Show information");
+
+      const heroContent = document.createElement("div");
+      heroContent.innerHTML = `
+        <div class="eyebrow">VR Creative · Show</div>
+        <h1>${sanitizeText(show.title)}</h1>
+        <p class="tagline">${sanitizeText(show.tagline || "")}</p>
+      `;
+
+      // CTA group
+      const ctaGroup = document.createElement("div");
+      ctaGroup.className = "cta-group";
+
+      const bookBtn = document.createElement("a");
+      bookBtn.className = "btn btn-primary";
+      bookBtn.href = `mailto:${CONFIG.bookingEmail}?subject=${encodeURIComponent(show.title)}`;
+      bookBtn.textContent = "Book this show";
+      bookBtn.setAttribute("aria-label", `Send email to book ${show.title}`);
+      ctaGroup.appendChild(bookBtn);
+
+      if (show.videourl) {
+        const videoBtn = document.createElement("a");
+        videoBtn.className = "btn btn-secondary";
+        videoBtn.href = show.videourl;
+        videoBtn.target = "_blank";
+        videoBtn.rel = "noopener noreferrer";
+        videoBtn.textContent = "Watch highlight";
+        videoBtn.setAttribute("aria-label", `Watch ${show.title} video highlight (opens in new tab)`);
+        ctaGroup.appendChild(videoBtn);
+      }
+
+      heroContent.appendChild(ctaGroup);
+
+      // Tags
+      const tagsWrap = document.createElement("div");
+      tagsWrap.className = "tags";
+      tagsWrap.setAttribute("aria-label", "Show categories");
+      (show.tags || []).forEach(tag => tagsWrap.appendChild(createTagPill(tag)));
+      heroContent.appendChild(tagsWrap);
+
+      hero.appendChild(heroContent);
+
+      // Image
+      if (show.imageurl) {
+        const img = document.createElement("img");
+        img.src = show.imageurl;
+        img.alt = `${show.title} performance`;
+        img.loading = "lazy";
+        img.onerror = function() {
+          this.style.display = 'none';
+          console.warn('Failed to load show image:', show.imageurl);
+        };
+        hero.appendChild(img);
+      }
+
+      return hero;
+    }
+
+    /**
+     * Build body content section
+     */
+    function buildBody(show) {
+      const body = document.createElement("section");
+      body.className = "body-copy";
+      body.innerHTML = sanitizeHTML(show.full_bio || "");
+      return body;
+    }
+
+    /**
+     * Build related shows section
+     */
+    function buildRelated(shows, show) {
+      const related = shows
+        .filter(candidate =>
+          candidate.page_slug !== show.page_slug &&
+          candidate.tags &&
+          candidate.tags.some(t => show.tags?.includes(t))
+        )
+        .slice(0, 6);
+
+      if (!related.length) return null;
+
+      const section = document.createElement("section");
+      section.setAttribute("aria-label", "Related shows");
+
+      const title = document.createElement("h2");
+      title.className = "section-title";
+      title.textContent = "Related shows";
+      section.appendChild(title);
+
+      const grid = document.createElement("div");
+      grid.className = "related-grid";
+
+      related.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        if (item.imageurl) {
+          const img = document.createElement("img");
+          img.src = item.imageurl;
+          img.alt = `${item.title} performance`;
+          img.loading = "lazy";
+          img.onerror = function() { this.style.display = 'none'; };
+          card.appendChild(img);
+        }
+
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+
+        const cardTitle = document.createElement("h3");
+        cardTitle.className = "card-title";
+        cardTitle.textContent = sanitizeText(item.title);
+        cardBody.appendChild(cardTitle);
+
+        if (item.tagline) {
+          const tagline = document.createElement("p");
+          tagline.className = "muted";
+          tagline.textContent = sanitizeText(item.tagline);
+          cardBody.appendChild(tagline);
+        }
+
+        const cardTags = document.createElement("div");
+        cardTags.className = "card-tags";
+        (item.tags || []).slice(0, 4).forEach(tag => {
+          const link = document.createElement("a");
+          link.href = `${CONFIG.tagLinkBase}${encodeURIComponent(tag)}`;
+          link.textContent = `#${sanitizeText(tag)}`;
+          link.setAttribute("aria-label", `View ${tag} tag page`);
+          cardTags.appendChild(link);
+        });
+        cardBody.appendChild(cardTags);
+
+        const learnMore = document.createElement("a");
+        learnMore.className = "btn btn-secondary";
+        learnMore.href = `${CONFIG.showLinkBase}${item.page_slug}`;
+        learnMore.textContent = "Learn more";
+        learnMore.setAttribute("aria-label", `Learn more about ${item.title}`);
+        cardBody.appendChild(learnMore);
+
+        card.appendChild(cardBody);
+        grid.appendChild(card);
+      });
+
+      section.appendChild(grid);
+      return section;
+    }
+
+    /**
+     * Build CTA section
+     */
+    function buildCTA(show) {
+      const cta = document.createElement("section");
+      cta.setAttribute("aria-label", "Booking information");
+
+      const title = document.createElement("h2");
+      title.className = "section-title";
+      title.textContent = "Ready to book?";
+      cta.appendChild(title);
+
+      const description = document.createElement("p");
+      description.className = "muted";
+      description.textContent = "Tell us about your event and we will customize this performance for your stage.";
+      cta.appendChild(description);
+
+      const ctaGroup = document.createElement("div");
+      ctaGroup.className = "cta-group";
+
+      const emailBtn = document.createElement("a");
+      emailBtn.className = "btn btn-primary";
+      emailBtn.href = `mailto:${CONFIG.bookingEmail}?subject=${encodeURIComponent(show.title)}`;
+      emailBtn.textContent = "Start the booking";
+      emailBtn.setAttribute("aria-label", "Send email to start booking process");
+      ctaGroup.appendChild(emailBtn);
+
+      const phoneBtn = document.createElement("a");
+      phoneBtn.className = "btn btn-secondary";
+      phoneBtn.href = `tel:${CONFIG.bookingPhone}`;
+      phoneBtn.textContent = "Call our producers";
+      phoneBtn.setAttribute("aria-label", `Call ${CONFIG.bookingPhone}`);
+      ctaGroup.appendChild(phoneBtn);
+
+      cta.appendChild(ctaGroup);
+      return cta;
+    }
+
+    /**
+     * Render the complete show page
+     */
+    function render(show, shows) {
+      const root = document.getElementById("show-root");
+      root.innerHTML = "";
+
+      // Build and append sections
+      root.appendChild(buildHero(show));
+      root.appendChild(buildBody(show));
+      root.appendChild(buildCTA(show));
+
+      const related = buildRelated(shows, show);
+      if (related) {
+        root.appendChild(related);
+      }
+    }
+
+    /**
+     * Display error message
+     */
+    function showError(message) {
+      const root = document.getElementById("show-root");
+      root.innerHTML = `
+        <div class="error" role="alert">
+          <h2>Unable to Load Show</h2>
+          <p>${sanitizeText(message)}</p>
+          <p><a href="/" class="btn btn-primary">Return to homepage</a></p>
+        </div>
+      `;
+    }
+
+    // ===== Main Initialization =====
+
+    /**
+     * Initialize the show loader
+     */
+    async function init() {
+      try {
+        // Fetch show data
+        const shows = await fetchShows();
+
+        if (!shows || shows.length === 0) {
+          throw new Error("No show data available");
+        }
+
+        // Find the requested show
+        const show = shows.find(item => item.page_slug === CONFIG.showSlug) || shows[0];
+
+        if (!show) {
+          throw new Error("Show not found");
+        }
+
+        // Inject metadata and render
+        injectMeta(show);
+        render(show, shows);
+
+        console.log(`✓ Show loaded: ${show.title}`);
+      } catch (error) {
+        console.error("Show loader error:", error);
+        showError(error.message || "An unexpected error occurred");
+      }
+    }
+
+    // Start the loader
+    init();
+  </script>
+</body>
+</html>
