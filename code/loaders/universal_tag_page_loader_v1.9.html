@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VR Creative Tag Loader</title>
+  <meta name="description" content="Filter VR Creative shows by tag." />
+  <style>
+    :root {
+      --bg: #05050a;
+      --panel: #0f1020;
+      --card: #15172b;
+      --text: #f1f1f5;
+      --muted: #b7bacf;
+      --accent: #7cf0ff;
+      --border: #1f2135;
+      --max-width: 1160px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .shell { max-width: var(--max-width); margin: 0 auto; padding: 30px 20px 80px; }
+    h1 { margin: 0 0 10px; font-size: clamp(30px, 5vw, 46px); }
+    .muted { color: var(--muted); }
+    .filters { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin: 18px 0; }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .pill { padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); background: #101225; cursor: pointer; color: var(--text); }
+    .pill.active { background: linear-gradient(120deg, #00c6ff, #0072ff); border-color: transparent; color: #fff; box-shadow: 0 8px 24px rgba(0, 114, 255, 0.35); }
+    .search { flex: 1 1 240px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: #0a0b18; color: var(--text); }
+    .collapsible { margin-top: 12px; }
+    details { background: #0a0b18; border-radius: 12px; border: 1px solid var(--border); padding: 12px 14px; }
+    summary { cursor: pointer; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 22px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 28px rgba(0,0,0,0.32); }
+    .card img { width: 100%; height: 160px; object-fit: cover; }
+    .card-body { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag-row a { color: var(--muted); text-decoration: none; font-size: 12px; }
+    .cta { margin-top: 30px; padding: 20px; background: linear-gradient(120deg, rgba(0, 198, 255, 0.16), rgba(0, 114, 255, 0.1)); border: 1px solid rgba(124, 240, 255, 0.35); border-radius: 14px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <p class="muted">VR Creative · Filtered Shows</p>
+      <h1 id="page-title">Featured shows</h1>
+      <p class="muted" id="page-subtitle">Search by tag, vibe, or name.</p>
+    </header>
+    <section class="filters">
+      <div class="filter-row">
+        <input id="search" class="search" placeholder="Search shows..." aria-label="Search shows" />
+        <div id="pill-row" class="filter-row"></div>
+      </div>
+      <div class="collapsible">
+        <details>
+          <summary>More filters</summary>
+          <div id="secondary-pills" class="filter-row" style="margin-top: 12px;"></div>
+        </details>
+      </div>
+    </section>
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <section class="cta">
+      <h2 style="margin: 0 0 10px;">Need guidance?</h2>
+      <p class="muted" style="margin: 0 0 12px;">Tell us about your event and we will curate a shortlist for you.</p>
+      <a class="pill active" href="mailto:booking@vrcreative.com?subject=Show%20recommendation">Get recommendations</a>
+    </section>
+  </div>
+
+  <script>
+    const dataUrl = window.SHOW_DATA_URL || "https://example.com/shows.json";
+    const query = new URLSearchParams(window.location.search);
+    const tagParam = query.get("tag");
+    const tagLinkBase = "/filtered-shows?tag=";
+
+    const state = {
+      shows: [],
+      activeTags: tagParam ? [tagParam] : [],
+      search: "",
+    };
+
+    async function fetchShows() {
+      if (window.SHOW_DATA) return window.SHOW_DATA;
+      const res = await fetch(dataUrl);
+      if (!res.ok) throw new Error("Unable to fetch show data");
+      return res.json();
+    }
+
+    function uniqueTags(shows) {
+      const all = new Set();
+      shows.forEach(show => (show.tags || []).forEach(t => all.add(t)));
+      return Array.from(all).sort();
+    }
+
+    function renderPills(container, tags) {
+      container.innerHTML = "";
+      tags.forEach(tag => {
+        const pill = document.createElement("button");
+        pill.className = "pill" + (state.activeTags.includes(tag) ? " active" : "");
+        pill.textContent = tag;
+        pill.setAttribute("data-tag", tag);
+        pill.onclick = () => toggleTag(tag);
+        container.appendChild(pill);
+      });
+    }
+
+    function toggleTag(tag) {
+      if (state.activeTags.includes(tag)) {
+        state.activeTags = state.activeTags.filter(t => t !== tag);
+      } else {
+        state.activeTags = [...state.activeTags, tag];
+      }
+      update();
+    }
+
+    function filteredShows() {
+      return state.shows.filter(show => {
+        const matchesSearch = !state.search || `${show.title} ${show.tagline}`.toLowerCase().includes(state.search.toLowerCase());
+        const matchesTags = !state.activeTags.length || state.activeTags.every(tag => show.tags?.includes(tag));
+        return matchesSearch && matchesTags;
+      });
+    }
+
+    function renderGrid(shows) {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      if (!shows.length) {
+        grid.innerHTML = '<p class="muted">No shows match your filters yet.</p>';
+        return;
+      }
+      shows.forEach(show => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          ${show.imageurl ? `<img src="${show.imageurl}" alt="${show.title}" loading="lazy" />` : ""}
+          <div class="card-body">
+            <h3 style="margin: 0;">${show.title}</h3>
+            <p class="muted" style="margin: 0;">${show.tagline || ""}</p>
+            <div class="tag-row"></div>
+            <a class="pill" style="align-self: flex-start;" href="/stage-shows/${show.page_slug}">Learn more</a>
+          </div>
+        `;
+        const tags = card.querySelector(".tag-row");
+        (show.tags || []).forEach(tag => {
+          const link = document.createElement("a");
+          link.href = `${tagLinkBase}${encodeURIComponent(tag)}`;
+          link.textContent = `#${tag}`;
+          tags.appendChild(link);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function update() {
+      const filtered = filteredShows();
+      renderGrid(filtered);
+      const title = document.getElementById("page-title");
+      const subtitle = document.getElementById("page-subtitle");
+      if (state.activeTags.length) {
+        title.textContent = `Shows tagged: ${state.activeTags.join(", ")}`;
+        subtitle.textContent = "Live search + stackable tags enabled.";
+      } else {
+        title.textContent = "Featured shows";
+        subtitle.textContent = "Search by tag, vibe, or name.";
+      }
+    }
+
+    async function init() {
+      state.shows = await fetchShows();
+      const pills = uniqueTags(state.shows);
+      renderPills(document.getElementById("pill-row"), pills.slice(0, 10));
+      renderPills(document.getElementById("secondary-pills"), pills.slice(10));
+      document.getElementById("search").addEventListener("input", (e) => {
+        state.search = e.target.value;
+        update();
+      });
+      update();
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VR Creative Offerings Grid</title>
+  <meta name="description" content="Featured VR Creative shows" />
+  <style>
+    :root {
+      --bg: #040406;
+      --panel: #0e0e19;
+      --card: #161629;
+      --border: #22223b;
+      --text: #f2f2f7;
+      --muted: #b5b7c8;
+      --accent: #7cf0ff;
+      --max-width: 1200px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .shell { max-width: var(--max-width); margin: 0 auto; padding: 34px 20px 80px; }
+    h1 { margin: 0 0 10px; font-size: clamp(32px, 6vw, 48px); }
+    .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); }
+    .card img { width: 100%; height: 180px; object-fit: cover; }
+    .card-body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .pill { align-self: flex-start; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); background: #101025; color: var(--text); text-decoration: none; font-weight: 600; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { padding: 6px 10px; border-radius: 12px; background: #0c0c1a; border: 1px solid var(--border); color: var(--muted); font-size: 12px; text-decoration: none; }
+    .header-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .sort-select { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: #0a0a16; color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="header-panel">
+      <div>
+        <p class="muted" style="margin: 0;">VR Creative · Offerings</p>
+        <h1 style="margin: 0;">Bookable shows</h1>
+      </div>
+      <label style="display: flex; align-items: center; gap: 8px;">
+        <span class="muted">Sort</span>
+        <select id="sort" class="sort-select">
+          <option value="featured">Featured first</option>
+          <option value="title">Title (A-Z)</option>
+        </select>
+      </label>
+    </div>
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </div>
+
+  <script>
+    const dataUrl = window.SHOW_DATA_URL || "https://example.com/shows.json";
+    const tagLinkBase = "/filtered-shows?tag=";
+
+    async function fetchShows() {
+      if (window.SHOW_DATA) return window.SHOW_DATA;
+      const res = await fetch(dataUrl);
+      if (!res.ok) throw new Error("Unable to fetch show data");
+      return res.json();
+    }
+
+    function sortShows(shows, mode) {
+      if (mode === "title") return [...shows].sort((a, b) => a.title.localeCompare(b.title));
+      return [...shows].sort((a, b) => Number(b.featured) - Number(a.featured));
+    }
+
+    function renderGrid(shows) {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      shows.forEach(show => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          ${show.imageurl ? `<img src="${show.imageurl}" alt="${show.title}" loading="lazy" />` : ""}
+          <div class="card-body">
+            <h3 style="margin: 0;">${show.title}</h3>
+            <p class="muted" style="margin: 0;">${show.short_description || show.tagline || ""}</p>
+            <div class="tags"></div>
+            <a class="pill" href="/stage-shows/${show.page_slug}">View show</a>
+          </div>
+        `;
+        const tagWrap = card.querySelector(".tags");
+        (show.tags || []).slice(0, 4).forEach(tag => {
+          const pill = document.createElement("a");
+          pill.className = "tag";
+          pill.href = `${tagLinkBase}${encodeURIComponent(tag)}`;
+          pill.textContent = tag;
+          tagWrap.appendChild(pill);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    async function init() {
+      const shows = await fetchShows();
+      const grid = document.getElementById("grid");
+      const select = document.getElementById("sort");
+      const render = () => renderGrid(sortShows(shows, select.value));
+      select.addEventListener("change", render);
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
