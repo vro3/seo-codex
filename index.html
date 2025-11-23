@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO Codex - Show Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 0.95em;
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      background: white;
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px 20px;
+      background: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:hover {
+      background: #f8f9fa;
+      color: #0066cc;
+    }
+
+    .tab.active {
+      color: #0066cc;
+      border-bottom-color: #0066cc;
+      background: #f8f9ff;
+    }
+
+    /* Content Area */
+    .content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Status Bar */
+    .status-bar {
+      background: white;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-dot.error {
+      background: #f44336;
+    }
+
+    /* Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+
+    .card h3 {
+      color: #0066cc;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .card .tagline {
+      color: #666;
+      font-style: italic;
+      margin-bottom: 12px;
+      font-size: 0.95em;
+    }
+
+    .card .description {
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 15px 0;
+    }
+
+    .tag {
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.85em;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: #0066cc;
+      color: white;
+    }
+
+    .featured-badge {
+      background: #ffc107;
+      color: #000;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    /* Controls */
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #0052a3;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: #6c757d;
+    }
+
+    button.secondary:hover {
+      background: #5a6268;
+    }
+
+    /* Alert Messages */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      animation: slideDown 0.3s;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-left: 4px solid #17a2b8;
+    }
+
+    /* Modal for Show Details */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      overflow-y: auto;
+      animation: fadeIn 0.3s;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: slideUp 0.3s;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      position: sticky;
+      top: 0;
+      background: white;
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #666;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: #f0f0f0;
+      color: #000;
+      transform: none;
+    }
+
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .filter-pill {
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+
+    .filter-pill:hover {
+      border-color: #0066cc;
+    }
+
+    .filter-pill.active {
+      background: #0066cc;
+      color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0066cc;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 40px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .tabs {
+        overflow-x: auto;
+      }
+
+      .tab {
+        flex: none;
+        min-width: 120px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        margin: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>🎭 SEO Codex - Show Manager</h1>
+    <p>Manage and preview your entertainment show database</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('browse')">
+      📊 Browse All Shows
+    </button>
+    <button class="tab" onclick="switchTab('filter')">
+      🏷️ Filter by Tag
+    </button>
+    <button class="tab" onclick="switchTab('load')">
+      📥 Load Data
+    </button>
+    <button class="tab" onclick="switchTab('about')">
+      ℹ️ About
+    </button>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Ready to load data</span>
+      </div>
+      <span id="showCount">0 shows loaded</span>
+    </div>
+
+    <!-- Tab 1: Browse All Shows -->
+    <div id="tab-browse" class="tab-content active">
+      <div class="controls">
+        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+          <div class="control-group" style="flex: 1; min-width: 200px;">
+            <label for="sortBy">Sort by:</label>
+            <select id="sortBy" onchange="sortShows(this.value)">
+              <option value="featured">Featured First</option>
+              <option value="title">Title (A-Z)</option>
+              <option value="title-desc">Title (Z-A)</option>
+            </select>
+          </div>
+          <div class="control-group" style="flex: 1; min-width: 250px;">
+            <label for="searchAll">Search:</label>
+            <input type="text" id="searchAll" placeholder="Search shows..." oninput="filterAllShows()">
+          </div>
+        </div>
+      </div>
+
+      <div id="alertContainer"></div>
+      <div id="browseGrid" class="grid">
+        <div class="empty-state">
+          <p style="font-size: 1.2em; margin-bottom: 10px;">No data loaded</p>
+          <p>Go to the "Load Data" tab to load your shows</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Filter by Tag -->
+    <div id="tab-filter" class="tab-content">
+      <div class="controls">
+        <div class="control-group">
+          <label for="searchTag">Search:</label>
+          <input type="text" id="searchTag" placeholder="Search filtered shows..." oninput="filterTagShows()">
+        </div>
+        <div class="control-group">
+          <label>Available Tags:</label>
+          <div id="tagPills" class="filter-pills">
+            <p style="color: #666;">Load data to see available tags</p>
+          </div>
+        </div>
+        <div class="control-group" id="secondaryFiltersGroup" style="display: none;">
+          <label>Refine by additional tags:</label>
+          <div id="secondaryFilters" class="filter-pills"></div>
+        </div>
+      </div>
+
+      <div id="filterGrid" class="grid"></div>
+    </div>
+
+    <!-- Tab 3: Load Data -->
+    <div id="tab-load" class="tab-content">
+      <div class="controls">
+        <h2 style="margin-bottom: 20px;">Load Show Data</h2>
+
+        <!-- Method 1: Remote URL -->
+        <div class="control-group">
+          <label for="remoteUrl">📡 Method 1: Load from URL (GitHub, Google Sheets, etc.)</label>
+          <input type="text" id="remoteUrl" placeholder="https://raw.githubusercontent.com/vro3/seo-codex/main/data/shows.json">
+          <button onclick="loadFromURL()" style="margin-top: 10px;">Load from URL</button>
+        </div>
+
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid #e0e0e0;">
+
+        <!-- Method 2: Local File -->
+        <div class="control-group">
+          <label for="localFile">💾 Method 2: Upload Local JSON File</label>
+          <input type="file" id="localFile" accept=".json">
+          <button onclick="loadFromFile()" style="margin-top: 10px;">Load from File</button>
+        </div>
+
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid #e0e0e0;">
+
+        <!-- Method 3: Sample Data -->
+        <div class="control-group">
+          <label>🧪 Method 3: Load Sample Data</label>
+          <p style="color: #666; margin-bottom: 10px; font-size: 0.95em;">Load pre-built sample data to test the system</p>
+          <button onclick="loadSampleData()">Load Sample Data</button>
+        </div>
+      </div>
+
+      <div id="loadStatus"></div>
+    </div>
+
+    <!-- Tab 4: About -->
+    <div id="tab-about" class="tab-content">
+      <div class="controls">
+        <h2 style="margin-bottom: 15px;">About SEO Codex</h2>
+        <p style="line-height: 1.8; margin-bottom: 20px;">
+          <strong>SEO Codex</strong> is a show management system for VR Creative Group.
+          It helps you manage your entertainment show database with proper SEO optimization.
+        </p>
+
+        <h3 style="margin: 25px 0 15px 0; color: #0066cc;">✨ Features</h3>
+        <ul style="line-height: 2; margin-left: 20px;">
+          <li>Load show data from multiple sources (URLs, local files, Google Sheets)</li>
+          <li>Browse and search your entire show catalog</li>
+          <li>Filter shows by tags for easy discovery</li>
+          <li>SEO-optimized metadata for each show</li>
+          <li>Responsive design that works on all devices</li>
+        </ul>
+
+        <h3 style="margin: 25px 0 15px 0; color: #0066cc;">🚀 Quick Start</h3>
+        <ol style="line-height: 2; margin-left: 20px;">
+          <li>Go to the <strong>"Load Data"</strong> tab</li>
+          <li>Choose a loading method (URL, file, or sample data)</li>
+          <li>Browse your shows in the <strong>"Browse All Shows"</strong> tab</li>
+          <li>Use <strong>"Filter by Tag"</strong> to find shows by category</li>
+        </ol>
+
+        <h3 style="margin: 25px 0 15px 0; color: #0066cc;">📊 Data Format</h3>
+        <p style="line-height: 1.8; margin-bottom: 15px;">Your JSON file should follow this structure:</p>
+        <pre style="background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 0.9em;">
+{
+  "shows": [
+    {
+      "title": "Show Name",
+      "meta_title": "SEO Title",
+      "meta_description": "SEO description...",
+      "page_slug": "show-name",
+      "tags": ["tag1", "tag2"],
+      "imageurl": "https://...",
+      "videourl": "https://...",
+      ...
+    }
+  ]
+}</pre>
+
+        <h3 style="margin: 25px 0 15px 0; color: #0066cc;">💡 Tips</h3>
+        <ul style="line-height: 2; margin-left: 20px;">
+          <li>Use the sample data to test before loading your own</li>
+          <li>Ensure your JSON follows the required format</li>
+          <li>Tags help with organization and SEO</li>
+          <li>All image URLs should use HTTPS</li>
+        </ul>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+          <p style="margin: 0;"><strong>Need Help?</strong> Check the <code>LOCAL_SETUP_GUIDE.md</code> file in your project directory.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Show Details -->
+  <div id="showModal" class="modal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="modalTitle">Show Details</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Show details will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let allShows = [];
+    let currentTag = null;
+    let secondaryFilters = new Set();
+
+    // Sample data
+    const SAMPLE_DATA = {
+      "shows": [
+        {
+          "title": "AI DJ Experience",
+          "meta_title": "AI DJ - Interactive Music Experience | VR Creative",
+          "meta_description": "Experience the future of entertainment with our AI-powered DJ that creates unique musical experiences tailored to your corporate event.",
+          "page_slug": "ai-dj-experience",
+          "tags": ["ai", "dj", "interactive", "high-energy", "tech", "innovation"],
+          "tagline": "The Future of Music is Here",
+          "short_description": "AI-powered interactive DJ experience that adapts to your crowd",
+          "full_bio": "Our AI DJ Experience combines cutting-edge artificial intelligence with musical expertise to create unforgettable experiences. Using advanced algorithms and real-time crowd analysis, our AI DJ reads the room and delivers the perfect soundtrack for your event.",
+          "imageurl": "https://images.unsplash.com/photo-1571266028243-d220c05aafbe?w=800",
+          "videourl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "event_type": "corporate-entertainment",
+          "experience_type": "interactive",
+          "group_size": "50-5000",
+          "featured": true
+        },
+        {
+          "title": "LED Drumline",
+          "meta_title": "LED Drumline - High-Energy Percussion Show | VR Creative",
+          "meta_description": "Spectacular LED-lit drumline performance combining precision percussion with stunning visual effects. Perfect for corporate events.",
+          "page_slug": "led-drumline",
+          "tags": ["led", "drums", "drumline", "high-energy", "performance", "visual"],
+          "tagline": "Rhythm Meets Light",
+          "short_description": "High-energy LED percussion performance with stunning visuals",
+          "full_bio": "Our LED Drumline delivers precision percussion enhanced with cutting-edge LED technology. This high-energy performance combines traditional drumline expertise with modern visual spectacle.",
+          "imageurl": "https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=800",
+          "videourl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "event_type": "performance",
+          "experience_type": "visual",
+          "group_size": "4-12 performers",
+          "featured": true
+        },
+        {
+          "title": "Interactive Comedy Show",
+          "meta_title": "Interactive Comedy - Audience Participation | VR Creative",
+          "meta_description": "Hilarious interactive comedy show that engages your audience. Professional comedians create custom entertainment perfect for corporate events.",
+          "page_slug": "interactive-comedy",
+          "tags": ["comedy", "interactive", "corporate-entertainment", "high-energy", "performance"],
+          "tagline": "Laugh Together, Work Better",
+          "short_description": "Customized interactive comedy perfect for team building",
+          "full_bio": "Our Interactive Comedy Show brings professional stand-up comedy to your corporate event with a twist - your team becomes part of the show. Our experienced comedians specialize in clean, corporate-appropriate humor.",
+          "imageurl": "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=800",
+          "event_type": "corporate-entertainment",
+          "experience_type": "interactive",
+          "group_size": "20-500",
+          "featured": false
+        },
+        {
+          "title": "Remix Live Band",
+          "meta_title": "Remix Live Band - Modern Music Mashups | VR Creative",
+          "meta_description": "Live band performing modern remixes and mashups of your favorite hits. High-energy entertainment perfect for corporate parties.",
+          "page_slug": "remix-live-band",
+          "tags": ["live-music", "remix", "high-energy", "performance", "interactive", "dj"],
+          "tagline": "Your Favorite Songs, Reimagined",
+          "short_description": "Live musicians performing modern remixes and mashups",
+          "full_bio": "The Remix Live Band brings a fresh take on live entertainment by combining skilled musicians with DJ technology. We perform modern remixes and mashups of popular hits, spanning decades and genres.",
+          "imageurl": "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=800",
+          "videourl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "event_type": "performance",
+          "experience_type": "interactive",
+          "group_size": "5-7 performers",
+          "featured": true
+        },
+        {
+          "title": "Roaming LED Characters",
+          "meta_title": "Roaming LED Characters - Interactive Greeters | VR Creative",
+          "meta_description": "Stunning LED-costumed characters that roam your event, interact with guests, and create unforgettable photo opportunities.",
+          "page_slug": "roaming-led-characters",
+          "tags": ["led", "roaming", "interactive", "immersive", "tech", "performance"],
+          "tagline": "Characters from the Future",
+          "short_description": "LED-costumed performers creating immersive experiences",
+          "full_bio": "Our Roaming LED Characters bring futuristic entertainment to your event. These skilled performers wear elaborate LED costumes that create stunning visual effects as they interact with guests.",
+          "imageurl": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800",
+          "event_type": "roaming",
+          "experience_type": "immersive",
+          "group_size": "2-8 performers",
+          "featured": false
+        }
+      ]
+    };
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+
+      // Special handling for filter tab
+      if (tabName === 'filter' && allShows.length > 0) {
+        buildTagPills();
+      }
+    }
+
+    // Update status
+    function updateStatus(message, count = null, isError = false) {
+      document.getElementById('statusText').textContent = message;
+      const dot = document.getElementById('statusDot');
+
+      if (isError) {
+        dot.classList.add('error');
+      } else {
+        dot.classList.remove('error');
+      }
+
+      if (count !== null) {
+        document.getElementById('showCount').textContent = `${count} show${count !== 1 ? 's' : ''} loaded`;
+      }
+    }
+
+    // Show alert
+    function showAlert(message, type = 'info') {
+      const container = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      container.appendChild(alert);
+
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
+    }
+
+    // Load from URL
+    async function loadFromURL() {
+      const url = document.getElementById('remoteUrl').value.trim();
+
+      if (!url) {
+        showAlert('Please enter a URL', 'error');
+        return;
+      }
+
+      updateStatus('Loading from URL...', null);
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+        const data = await response.json();
+        if (!data.shows || !Array.isArray(data.shows)) {
+          throw new Error('Invalid data format. Expected { shows: [...] }');
+        }
+
+        allShows = data.shows;
+        updateStatus('Data loaded successfully', allShows.length);
+        showAlert(`✓ Successfully loaded ${allShows.length} shows from URL`, 'success');
+        displayAllShows();
+        switchTab('browse');
+
+      } catch (error) {
+        updateStatus('Error loading data', null, true);
+        showAlert(`✗ Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Load from file
+    function loadFromFile() {
+      const fileInput = document.getElementById('localFile');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        showAlert('Please select a file', 'error');
+        return;
+      }
+
+      updateStatus('Reading file...', null);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.shows || !Array.isArray(data.shows)) {
+            throw new Error('Invalid data format. Expected { shows: [...] }');
+          }
+
+          allShows = data.shows;
+          updateStatus('Data loaded successfully', allShows.length);
+          showAlert(`✓ Successfully loaded ${allShows.length} shows from ${file.name}`, 'success');
+          displayAllShows();
+          switchTab('browse');
+
+        } catch (error) {
+          updateStatus('Error parsing file', null, true);
+          showAlert(`✗ Error: ${error.message}`, 'error');
+        }
+      };
+
+      reader.onerror = () => {
+        updateStatus('Error reading file', null, true);
+        showAlert('✗ Error reading file', 'error');
+      };
+
+      reader.readAsText(file);
+    }
+
+    // Load sample data
+    function loadSampleData() {
+      allShows = SAMPLE_DATA.shows;
+      updateStatus('Sample data loaded', allShows.length);
+      showAlert(`✓ Loaded ${allShows.length} sample shows`, 'success');
+      displayAllShows();
+      switchTab('browse');
+    }
+
+    // Sort shows
+    function sortShows(sortBy) {
+      let sorted = [...allShows];
+
+      switch(sortBy) {
+        case 'featured':
+          sorted.sort((a, b) => {
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            return a.title.localeCompare(b.title);
+          });
+          break;
+        case 'title':
+          sorted.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case 'title-desc':
+          sorted.sort((a, b) => b.title.localeCompare(a.title));
+          break;
+      }
+
+      displayShows(sorted, 'browseGrid');
+    }
+
+    // Filter all shows
+    function filterAllShows() {
+      const searchTerm = document.getElementById('searchAll').value.toLowerCase();
+
+      if (!searchTerm) {
+        sortShows(document.getElementById('sortBy').value);
+        return;
+      }
+
+      const filtered = allShows.filter(show =>
+        show.title.toLowerCase().includes(searchTerm) ||
+        (show.short_description || '').toLowerCase().includes(searchTerm) ||
+        (show.tagline || '').toLowerCase().includes(searchTerm) ||
+        (show.tags || []).some(tag => tag.toLowerCase().includes(searchTerm))
+      );
+
+      displayShows(filtered, 'browseGrid');
+    }
+
+    // Display shows
+    function displayAllShows() {
+      sortShows('featured');
+    }
+
+    function displayShows(shows, containerId = 'browseGrid') {
+      const container = document.getElementById(containerId);
+
+      if (shows.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p style="font-size: 1.2em; margin-bottom: 10px;">No shows found</p>
+            <p>Try adjusting your search or filters</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = shows.map(show => `
+        <div class="card" onclick="openShowModal('${show.page_slug}')">
+          ${show.imageurl ? `<img src="${show.imageurl}" alt="${show.title}">` : ''}
+          <div class="card-content">
+            ${show.featured ? '<div class="featured-badge">⭐ Featured</div>' : ''}
+            <h3>${show.title}</h3>
+            ${show.tagline ? `<p class="tagline">${show.tagline}</p>` : ''}
+            <p class="description">${show.short_description || show.meta_description || ''}</p>
+            ${show.tags && show.tags.length > 0 ? `
+              <div class="tags">
+                ${show.tags.slice(0, 5).map(tag => `<span class="tag">#${tag}</span>`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Build tag pills
+    function buildTagPills() {
+      const tagCounts = {};
+      allShows.forEach(show => {
+        (show.tags || []).forEach(tag => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+
+      const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+
+      const container = document.getElementById('tagPills');
+      container.innerHTML = sortedTags.map(([tag, count]) => `
+        <div class="filter-pill ${currentTag === tag ? 'active' : ''}" onclick="selectTag('${tag}')">
+          #${tag} <span style="opacity: 0.7;">(${count})</span>
+        </div>
+      `).join('');
+    }
+
+    // Select tag
+    function selectTag(tag) {
+      currentTag = tag;
+      secondaryFilters.clear();
+      buildTagPills();
+      filterByTag();
+      buildSecondaryFilters();
+    }
+
+    // Filter by tag
+    function filterByTag() {
+      if (!currentTag) {
+        document.getElementById('filterGrid').innerHTML = `
+          <div class="empty-state">
+            <p>Select a tag above to filter shows</p>
+          </div>
+        `;
+        return;
+      }
+
+      let filtered = allShows.filter(show =>
+        show.tags && show.tags.includes(currentTag)
+      );
+
+      // Apply secondary filters
+      if (secondaryFilters.size > 0) {
+        filtered = filtered.filter(show =>
+          Array.from(secondaryFilters).every(tag =>
+            show.tags && show.tags.includes(tag)
+          )
+        );
+      }
+
+      // Apply search
+      const searchTerm = document.getElementById('searchTag').value.toLowerCase();
+      if (searchTerm) {
+        filtered = filtered.filter(show =>
+          show.title.toLowerCase().includes(searchTerm) ||
+          (show.short_description || '').toLowerCase().includes(searchTerm) ||
+          (show.tagline || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      displayShows(filtered, 'filterGrid');
+    }
+
+    // Build secondary filters
+    function buildSecondaryFilters() {
+      const filtered = allShows.filter(show =>
+        show.tags && show.tags.includes(currentTag)
+      );
+
+      const tagCounts = {};
+      filtered.forEach(show => {
+        (show.tags || []).forEach(tag => {
+          if (tag !== currentTag) {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          }
+        });
+      });
+
+      const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+
+      if (sortedTags.length === 0) {
+        document.getElementById('secondaryFiltersGroup').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('secondaryFiltersGroup').style.display = 'block';
+      const container = document.getElementById('secondaryFilters');
+      container.innerHTML = sortedTags.map(([tag, count]) => `
+        <div class="filter-pill ${secondaryFilters.has(tag) ? 'active' : ''}" onclick="toggleSecondaryFilter('${tag}')">
+          #${tag} <span style="opacity: 0.7;">(${count})</span>
+        </div>
+      `).join('');
+    }
+
+    // Toggle secondary filter
+    function toggleSecondaryFilter(tag) {
+      if (secondaryFilters.has(tag)) {
+        secondaryFilters.delete(tag);
+      } else {
+        secondaryFilters.add(tag);
+      }
+      buildSecondaryFilters();
+      filterByTag();
+    }
+
+    // Filter tag shows
+    function filterTagShows() {
+      filterByTag();
+    }
+
+    // Open show modal
+    function openShowModal(slug) {
+      const show = allShows.find(s => s.page_slug === slug);
+      if (!show) return;
+
+      document.getElementById('modalTitle').textContent = show.title;
+      document.getElementById('modalBody').innerHTML = `
+        ${show.imageurl ? `
+          <img src="${show.imageurl}" alt="${show.title}" style="width: 100%; border-radius: 8px; margin-bottom: 20px;">
+        ` : ''}
+
+        ${show.featured ? '<div class="featured-badge" style="margin-bottom: 15px;">⭐ Featured Show</div>' : ''}
+
+        ${show.tagline ? `<p style="font-size: 1.3em; color: #666; font-style: italic; margin-bottom: 20px;">${show.tagline}</p>` : ''}
+
+        <div style="margin: 20px 0;">
+          <h3 style="color: #0066cc; margin-bottom: 10px;">About</h3>
+          <p style="line-height: 1.8;">${show.full_bio || show.short_description || show.meta_description || ''}</p>
+        </div>
+
+        ${show.tags && show.tags.length > 0 ? `
+          <div style="margin: 25px 0;">
+            <h3 style="color: #0066cc; margin-bottom: 10px;">Tags</h3>
+            <div class="tags">
+              ${show.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0;">
+          ${show.event_type ? `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+              <h4 style="color: #0066cc; margin-bottom: 8px;">Event Type</h4>
+              <p style="margin: 0;">${show.event_type}</p>
+            </div>
+          ` : ''}
+          ${show.experience_type ? `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+              <h4 style="color: #0066cc; margin-bottom: 8px;">Experience</h4>
+              <p style="margin: 0;">${show.experience_type}</p>
+            </div>
+          ` : ''}
+          ${show.group_size ? `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+              <h4 style="color: #0066cc; margin-bottom: 8px;">Group Size</h4>
+              <p style="margin: 0;">${show.group_size}</p>
+            </div>
+          ` : ''}
+        </div>
+
+        ${show.videourl ? `
+          <div style="margin: 25px 0;">
+            <h3 style="color: #0066cc; margin-bottom: 15px;">Video</h3>
+            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px;">
+              <iframe src="${show.videourl.replace('watch?v=', 'embed/')}"
+                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                      allowfullscreen>
+              </iframe>
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+          <p style="margin: 0;"><strong>SEO Info</strong></p>
+          <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #666;">
+            <strong>Meta Title:</strong> ${show.meta_title || 'N/A'}<br>
+            <strong>Meta Description:</strong> ${show.meta_description || 'N/A'}<br>
+            <strong>Page Slug:</strong> ${show.page_slug}
+          </p>
+        </div>
+      `;
+
+      document.getElementById('showModal').classList.add('active');
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('showModal').classList.remove('active');
+    }
+
+    function closeModalOnBackdrop(event) {
+      if (event.target.id === 'showModal') {
+        closeModal();
+      }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Initialize
+    updateStatus('Ready to load data', 0);
+  </script>
+</body>
+</html>
