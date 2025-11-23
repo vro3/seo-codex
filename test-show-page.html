@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Show Page - SEO Codex</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-banner {
+      background: #0066cc;
+      color: white;
+      padding: 15px;
+      margin: -20px -20px 20px -20px;
+      text-align: center;
+    }
+    .test-info {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    #show-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="test-banner">
+    <h1>🧪 Test Show Page</h1>
+    <p>Testing Universal Show Loader with Local Data</p>
+  </div>
+
+  <div class="test-info">
+    <h3>📝 Instructions:</h3>
+    <ol>
+      <li>Make sure your local server is running: <code>npm run serve</code></li>
+      <li>This page loads: <code>data/shows-sample.json</code></li>
+      <li>Change the URL parameter to view different shows:
+        <ul>
+          <li><code>?show=ai-dj-experience</code> (default)</li>
+          <li><code>?show=led-drumline</code></li>
+          <li><code>?show=interactive-comedy</code></li>
+          <li><code>?show=remix-live-band</code></li>
+          <li><code>?show=roaming-led-characters</code></li>
+        </ul>
+      </li>
+    </ol>
+    <p><strong>Current slug:</strong> <code id="current-slug"></code></p>
+  </div>
+
+  <!-- Container for show content -->
+  <div id="show-container">
+    <p style="text-align: center; color: #666;">Loading show data...</p>
+  </div>
+
+  <script>
+    // Display current slug being loaded
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('show') || 'ai-dj-experience';
+    document.getElementById('current-slug').textContent = slug;
+
+    // If no show parameter, redirect with default
+    if (!params.get('show')) {
+      window.history.replaceState({}, '', '?show=ai-dj-experience');
+    }
+
+    // Configure data source - CHANGE THIS to use your own data
+    window.SHOW_DATA_URL = "http://localhost:8000/data/shows-sample.json";
+
+    // Alternatively, use your own data file:
+    // window.SHOW_DATA_URL = "http://localhost:8000/data/shows.json";
+
+    // Or use a remote URL:
+    // window.SHOW_DATA_URL = "https://raw.githubusercontent.com/vro3/seo-codex/main/data/shows.json";
+  </script>
+
+  <!-- Load the Universal Show Loader -->
+  <!-- Note: This is a simplified version for testing. In production, you'd include the full loader -->
+  <script>
+    // Simple show loader for testing
+    async function loadAndDisplayShow() {
+      try {
+        // Fetch show data
+        const response = await fetch(window.SHOW_DATA_URL);
+        if (!response.ok) throw new Error('Failed to fetch data');
+
+        const data = await response.json();
+        const shows = data.shows || [];
+
+        // Get show slug from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const showSlug = urlParams.get('show') || 'ai-dj-experience';
+
+        // Find the show
+        const show = shows.find(s => s.page_slug === showSlug);
+
+        if (!show) {
+          document.getElementById('show-container').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+              <h2>❌ Show Not Found</h2>
+              <p>No show found with slug: <code>${showSlug}</code></p>
+              <p>Available shows:</p>
+              <ul style="list-style: none; padding: 0;">
+                ${shows.map(s => `
+                  <li style="margin: 10px 0;">
+                    <a href="?show=${s.page_slug}">${s.title}</a>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          `;
+          return;
+        }
+
+        // Display the show
+        document.title = show.meta_title || show.title;
+        document.getElementById('show-container').innerHTML = `
+          <article>
+            <header style="margin-bottom: 30px;">
+              <h1 style="color: #0066cc; margin-bottom: 10px;">${show.title}</h1>
+              <p style="font-size: 1.3em; color: #666; font-style: italic;">${show.tagline || ''}</p>
+              <div style="margin: 15px 0;">
+                ${(show.tags || []).map(tag => `
+                  <a href="test-tag-page.html?tag=${tag}"
+                     style="display: inline-block; background: #e7f3ff; color: #0066cc;
+                            padding: 5px 12px; margin: 3px; border-radius: 15px;
+                            text-decoration: none; font-size: 0.9em;">
+                    #${tag}
+                  </a>
+                `).join('')}
+              </div>
+            </header>
+
+            ${show.imageurl ? `
+              <div style="margin: 30px 0;">
+                <img src="${show.imageurl}" alt="${show.title}"
+                     style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 8px;">
+              </div>
+            ` : ''}
+
+            <section style="margin: 30px 0;">
+              <h2>About ${show.title}</h2>
+              <p style="font-size: 1.1em; line-height: 1.6;">${show.full_bio || show.short_description}</p>
+            </section>
+
+            ${show.meta_description ? `
+              <section style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 30px 0;">
+                <p style="margin: 0; font-style: italic;">${show.meta_description}</p>
+              </section>
+            ` : ''}
+
+            <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+              ${show.event_type ? `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                  <h4 style="margin: 0 0 10px 0; color: #0066cc;">Event Type</h4>
+                  <p style="margin: 0;">${show.event_type}</p>
+                </div>
+              ` : ''}
+              ${show.group_size ? `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                  <h4 style="margin: 0 0 10px 0; color: #0066cc;">Group Size</h4>
+                  <p style="margin: 0;">${show.group_size}</p>
+                </div>
+              ` : ''}
+              ${show.experience_type ? `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                  <h4 style="margin: 0 0 10px 0; color: #0066cc;">Experience Type</h4>
+                  <p style="margin: 0;">${show.experience_type}</p>
+                </div>
+              ` : ''}
+            </section>
+
+            ${show.videourl ? `
+              <section style="margin: 30px 0;">
+                <h2>Video</h2>
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                  <iframe src="${show.videourl.replace('watch?v=', 'embed/')}"
+                          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                          allowfullscreen>
+                  </iframe>
+                </div>
+              </section>
+            ` : ''}
+
+            <section style="margin: 40px 0; text-align: center;">
+              <a href="test-offerings-grid.html"
+                 style="display: inline-block; background: #0066cc; color: white;
+                        padding: 12px 30px; text-decoration: none; border-radius: 5px;
+                        font-weight: 600;">
+                ← Back to All Shows
+              </a>
+            </section>
+          </article>
+        `;
+
+      } catch (error) {
+        console.error('Error loading show:', error);
+        document.getElementById('show-container').innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #d32f2f;">
+            <h2>⚠️ Error Loading Show</h2>
+            <p>${error.message}</p>
+            <p style="font-size: 0.9em; color: #666;">
+              Make sure your local server is running: <code>npm run serve</code>
+            </p>
+          </div>
+        `;
+      }
+    }
+
+    // Load show when page loads
+    loadAndDisplayShow();
+  </script>
+</body>
+</html>

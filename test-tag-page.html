@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Tag Page - SEO Codex</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-banner {
+      background: #0066cc;
+      color: white;
+      padding: 15px;
+      margin: -20px -20px 20px -20px;
+      text-align: center;
+    }
+    .test-info {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .tag-header {
+      background: white;
+      padding: 30px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .tag-header h1 {
+      color: #0066cc;
+      margin: 0 0 10px 0;
+    }
+    .search-box {
+      background: white;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+    .filters {
+      background: white;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    .filter-tag {
+      display: inline-block;
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 8px 15px;
+      margin: 5px;
+      border-radius: 20px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .filter-tag:hover {
+      background: #0066cc;
+      color: white;
+    }
+    .filter-tag.active {
+      background: #0066cc;
+      color: white;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .card h3 {
+      margin: 0 0 10px 0;
+      color: #0066cc;
+    }
+    .card .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 15px 0;
+    }
+    .card .tag {
+      background: #e7f3ff;
+      color: #0066cc;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.85em;
+    }
+    .card .view-btn {
+      display: inline-block;
+      background: #0066cc;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-banner">
+    <h1>🏷️ Test Tag Page</h1>
+    <p>Testing Tag Filter Loader with Local Data</p>
+  </div>
+
+  <div class="test-info">
+    <h3>📝 Instructions:</h3>
+    <ol>
+      <li>Make sure your local server is running: <code>npm run serve</code></li>
+      <li>This page loads: <code>data/shows-sample.json</code></li>
+      <li>Try different tags in the URL: <code>?tag=led</code>, <code>?tag=interactive</code></li>
+      <li>Use the search box to filter shows</li>
+      <li>Click filter pills to narrow results</li>
+    </ol>
+    <p><strong>Current tag:</strong> <code id="current-tag"></code></p>
+  </div>
+
+  <div class="tag-header">
+    <h1>Shows tagged: <span id="tag-name"></span></h1>
+    <p id="show-count"></p>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="search" placeholder="🔍 Search shows..." onkeyup="filterShows()">
+  </div>
+
+  <div class="filters">
+    <strong>Filter by additional tags:</strong>
+    <div id="filter-tags"></div>
+  </div>
+
+  <div id="shows-container" class="grid">
+    <p style="text-align: center; color: #666;">Loading shows...</p>
+  </div>
+
+  <script>
+    let allShows = [];
+    let filteredShows = [];
+    let currentTag = '';
+    let secondaryFilters = new Set();
+
+    // Configure data source
+    window.SHOW_DATA_URL = "http://localhost:8000/data/shows-sample.json";
+
+    async function loadShows() {
+      try {
+        // Get tag from URL
+        const params = new URLSearchParams(window.location.search);
+        currentTag = params.get('tag') || 'interactive';
+
+        document.getElementById('current-tag').textContent = currentTag;
+        document.getElementById('tag-name').textContent = `#${currentTag}`;
+
+        // Fetch data
+        const response = await fetch(window.SHOW_DATA_URL);
+        if (!response.ok) throw new Error('Failed to fetch data');
+
+        const data = await response.json();
+        allShows = data.shows || [];
+
+        // Filter by current tag
+        filteredShows = allShows.filter(show =>
+          show.tags && show.tags.includes(currentTag)
+        );
+
+        updateShowCount();
+        buildFilterTags();
+        displayShows();
+
+      } catch (error) {
+        console.error('Error loading shows:', error);
+        document.getElementById('shows-container').innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #d32f2f;">
+            <h2>⚠️ Error Loading Shows</h2>
+            <p>${error.message}</p>
+            <p style="font-size: 0.9em; color: #666;">
+              Make sure your local server is running: <code>npm run serve</code>
+            </p>
+          </div>
+        `;
+      }
+    }
+
+    function updateShowCount() {
+      const count = filteredShows.length;
+      document.getElementById('show-count').textContent =
+        `${count} show${count !== 1 ? 's' : ''} found`;
+    }
+
+    function buildFilterTags() {
+      // Get all tags from filtered shows
+      const tagCounts = {};
+      filteredShows.forEach(show => {
+        (show.tags || []).forEach(tag => {
+          if (tag !== currentTag) {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          }
+        });
+      });
+
+      // Sort by count
+      const sortedTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1]);
+
+      const container = document.getElementById('filter-tags');
+      container.innerHTML = sortedTags.map(([tag, count]) => `
+        <a href="#" class="filter-tag" onclick="toggleFilter('${tag}'); return false;">
+          #${tag} <span style="opacity: 0.7;">(${count})</span>
+        </a>
+      `).join('');
+    }
+
+    function toggleFilter(tag) {
+      if (secondaryFilters.has(tag)) {
+        secondaryFilters.delete(tag);
+      } else {
+        secondaryFilters.add(tag);
+      }
+      filterShows();
+
+      // Update active state
+      document.querySelectorAll('.filter-tag').forEach(el => {
+        const tagName = el.textContent.split('#')[1].split(' ')[0];
+        if (secondaryFilters.has(tagName)) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    function filterShows() {
+      const searchTerm = document.getElementById('search').value.toLowerCase();
+
+      let shows = [...filteredShows];
+
+      // Apply secondary tag filters
+      if (secondaryFilters.size > 0) {
+        shows = shows.filter(show =>
+          Array.from(secondaryFilters).every(tag =>
+            show.tags && show.tags.includes(tag)
+          )
+        );
+      }
+
+      // Apply search filter
+      if (searchTerm) {
+        shows = shows.filter(show =>
+          show.title.toLowerCase().includes(searchTerm) ||
+          (show.short_description || '').toLowerCase().includes(searchTerm) ||
+          (show.tagline || '').toLowerCase().includes(searchTerm)
+        );
+      }
+
+      displayShows(shows);
+    }
+
+    function displayShows(shows = filteredShows) {
+      const container = document.getElementById('shows-container');
+
+      if (shows.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+            <h2>No shows found</h2>
+            <p>Try adjusting your filters or search term.</p>
+            <a href="test-offerings-grid.html" style="color: #0066cc;">View all shows →</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = shows.map(show => `
+        <div class="card">
+          ${show.imageurl ? `
+            <img src="${show.imageurl}" alt="${show.title}">
+          ` : ''}
+          <div class="card-content">
+            <h3>${show.title}</h3>
+            ${show.tagline ? `<p style="color: #666; font-style: italic;">${show.tagline}</p>` : ''}
+            <p>${show.short_description || show.meta_description || ''}</p>
+
+            ${show.tags && show.tags.length > 0 ? `
+              <div class="tags">
+                ${show.tags.slice(0, 6).map(tag => `
+                  <span class="tag">#${tag}</span>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <a href="test-show-page.html?show=${show.page_slug}" class="view-btn">
+              View Details →
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load shows on page load
+    loadShows();
+  </script>
+</body>
+</html>
